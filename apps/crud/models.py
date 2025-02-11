@@ -45,4 +45,9 @@ class User(db.Model):
   def is_duplicate_username(self):
     return User.query.filter_by(username = self.username).first() is not None
   
+  def is_duplicate_nickname(self):
+    return User.query.filter_by(nickname = self.nickname).first() is not None
+  
+  def is_duplicate_email(self):
+    return User.query.filter_by(email = self.email).first() is not None
   

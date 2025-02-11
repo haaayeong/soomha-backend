@@ -2,6 +2,7 @@ from flask import Blueprint,request,jsonify
 from werkzeug.security import generate_password_hash
 from apps.crud.models import db, User, Level
 from apps.crud.enums import UserRole
+from apps.crud.forms import UserForm
 
 bp = Blueprint("crud", __name__, static_folder="static")
 
@@ -9,25 +10,31 @@ bp = Blueprint("crud", __name__, static_folder="static")
 def signup():
   data = request.get_json()
 
-  # 회원가입 중 필수값 확인
-  required_fields = ['username', 'password', 'confirmPassword', 'nickname', 'email', 'emailCode', 'role', 'area']
-  for field in required_fields:
-    if field not in data or not data[field]:
-      return jsonify({"error" : f"{field}는 필수입니다."}), 400
+  form = UserForm(data)
+
+  # 폼이 유효한지 확인
+  if not form.validate():
+    errors = []
+    for field, messages in form.errors.items():
+      for message in messages:
+        errors.append(f"{field}: {message}")
+    return jsonify({"error": errors}), 400
     
   # 비밀번호 확인
   if data['password'] != data['confirmPassword']:
     return jsonify({"error": "비밀번호가 일치하지 않습니다."}), 400
   
   # 아이디 중복 확인
-  existing_user = User.query.filter(username=data['username']).first()
-  if existing_user:
+  if User.is_duplicate_username(data['username']):
     return jsonify({"error" : "중복된 아이디입니다."}), 400
 
   # 닉네임 중복 확인
-  existing_nickname = User.query.filter_by(nickname=data['nickname']).first()
-  if existing_nickname:
+  if User.is_duplicate_username(data['nickname']):
     return jsonify({"error": "중복된 닉네임입니다."}), 400
+  
+  # 이메일 중복 확인
+  if User.is_duplicate_email(data['email']):
+    return jsonify({'error': "중복된 이메일입니다."}), 400
   
   # 기본 역할 설정
   if data['role'] not in [role.name for role in UserRole]:
