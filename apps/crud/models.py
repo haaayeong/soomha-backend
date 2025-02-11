@@ -41,3 +41,8 @@ class User(db.Model):
 
   def verify_password(self, password):
     return check_password_hash(self.password_hash, password)
+  
+  def is_duplicate_username(self):
+    return User.query.filter_by(username = self.username).first() is not None
+  
+  
