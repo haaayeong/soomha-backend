@@ -21,4 +21,8 @@ def create_app():
     from apps.crud import views as crud_views
     app.register_blueprint(crud_views.bp, url_prefix='/crud')
 
+    with app.app_context():
+        from apps.initialize import initialize_levels
+        initialize_levels()
+
     return app

@@ -1,6 +1,6 @@
 from apps.app import db
 from datetime import datetime
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from apps.crud.enums import UserRole
 
 class Level(db.Model):
@@ -31,3 +31,13 @@ class User(db.Model):
   created_at = db.Column(db.DateTime, default=datetime.now)
   updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+  @property
+  def password(self):
+    raise AttributeError('비밀번호는 접근이 불가능 합니다.')
+  
+  @password.setter
+  def password(self, password):
+    self.password_hash = generate_password_hash(password)
+
+  def verify_password(self, password):
+    return check_password_hash(self.password_hash, password)
