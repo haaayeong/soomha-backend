@@ -23,4 +23,27 @@ class PlayAreas(db.Model):
     rgnCdNm = db.Column(db.String(255), nullable=True)  # 지역 이름
     latCrtsVl = db.Column(db.String(50), nullable=True)  # 위도
     lotCrtsVl = db.Column(db.String(50), nullable=True)  # 경도
-    
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "pfctNm": self.pfctNm,
+            "pfctSn": self.pfctSn,
+            "instlPlaceCdNm": self.instlPlaceCdNm,
+            "operYnCd": self.operYnCd,
+            "operYnCdNm": self.operYnCdNm,
+            "dutyCd": self.dutyCd,
+            "dutyCdNm": self.dutyCdNm,
+            "prvtPblcYnCd": self.prvtPblcYnCd,
+            "prvtPblcYnCdNm": self.prvtPblcYnCdNm,
+            "ronaAddr": self.ronaAddr,
+            "ronaDaddr": self.ronaDaddr,
+            "instlYmd": self.instlYmd,
+            "instlPlaceCd": self.instlPlaceCd,
+            "idrodrCd": self.idrodrCd,
+            "idrodrCdNm": self.idrodrCdNm,
+            "rgnCd": self.rgnCd,
+            "rgnCdNm": self.rgnCdNm,
+            "latCrtsVl": self.latCrtsVl,
+            "lotCrtsVl": self.lotCrtsVl
+        }
