@@ -1,9 +1,8 @@
 from flask import Blueprint,request,jsonify
-from werkzeug.security import generate_password_hash
 from apps.crud.models import db, User, Level
 from apps.crud.enums import UserRole
 from apps.crud.forms import UserForm
-from utils import send_verification_eamil
+from apps.crud.utils import send_verification_eamil
 
 bp = Blueprint("crud", __name__, static_folder="static")
 
@@ -25,11 +24,7 @@ def signup():
     
   # 비밀번호 확인
   if data['password'] != data['confirmPassword']:
-    return jsonify({"error": "비밀번호가 일치하지 않습니다."}), 400
-  
-  # 아이디 중복 확인
-  if User.is_duplicate_username(data['username']):
-    return jsonify({"error" : "중복된 아이디입니다."}), 400
+    return jsonify({"error": "비밀번호가 일치하지 않습니다."}), 40
 
   # 닉네임 중복 확인
   if User.is_duplicate_username(data['nickname']):
@@ -68,6 +63,44 @@ def signup():
 
   return jsonify({"message": "사용자 정보가 잘 저장되었습니다."}), 201
 
+# 아이디 중복 확인
+@bp.route('/check-username', methods=["GET"])
+def check_username():
+  username = request.args.get('username')
+
+  if not username:
+    return jsonify({"error": "아이디를 입력해주세요."}), 400
+  
+  if User.is_duplicate_username(username):
+    return jsonify({"error": "중복된 아이디입니다."}), 400
+  
+  return jsonify({"message": "사용 가능한 아이디입니다."}), 200
+
+# 이메일 중복 확인
+@bp.route('/check-email', methods=["GET"])
+def check_email():
+  email = request.args.get('email')
+
+  if not email:
+    return jsonify({"error": "이메일을 입력해주세요."}), 400
+  
+  if User.is_duplicate_email(email):
+    return jsonify({"error": "중복된 이메일입니다."}), 400
+  
+  return jsonify({"message": "사용 가능한 이메일입니다."}), 200
+
+# 닉네임 중복 확인
+@bp.route('/check-nickname', methods=["GET"])
+def check_nickname():
+  nickname = request.args.get('nickname')
+
+  if not nickname:
+    return jsonify({"error": "닉네임을 입력해주세요."}), 400
+  
+  if User.is_duplicate_username(nickname):
+    return jsonify({"error": "중복된 닉네임입니다."}), 400
+  
+  return jsonify({"message": "사용 가능한 닉네임입니다."}), 200
 
 # 이메일 인증번호 전송 API
 @bp.route('/send_email_code', methods=['POST'])

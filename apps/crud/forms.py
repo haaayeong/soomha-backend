@@ -40,18 +40,31 @@ class UserForm(FlaskForm):
     )
 
     nickname = StringField(
-        validators=DataRequired(message='닉네임을 입력하세요.')
+        validators=[
+            DataRequired(message='닉네임을 입력하세요.')
+        ]
     )
 
     email_code = IntegerField(
-        validators=DataRequired(message="인증번호를 입력하세요.")
+        validators=[
+            DataRequired(message="인증번호를 입력하세요.")
+        ]
     )
 
     role = SelectField(
-        choices=[('child', '어린이'), ('parent', '학부모'), ('teacher', '선생님')],
-        validators=[DataRequired(message="가입 유형을 선택하세요.")]
+        choices=[
+            ('child', '어린이'), 
+            ('parent', '학부모'), 
+            ('teacher', '선생님')
+        ],
+
+        validators=[
+            DataRequired(message="가입 유형을 선택하세요.")
+        ]
     )
 
     area = SelectField(
-        validators=DataRequired(message="지역을 선택하세요.")
+        validators=[
+            DataRequired(message="지역을 선택하세요.")
+        ]
     )

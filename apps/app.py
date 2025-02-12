@@ -12,7 +12,7 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)  # React에서 Flask API 호출 허용
+    CORS(app, origins=["http://localhost:5173"])  # React에서 Flask API 호출 허용
 
     app.config.from_object(config[config_key])
 

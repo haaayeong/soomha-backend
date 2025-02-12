@@ -42,12 +42,12 @@ class User(db.Model):
   def verify_password(self, password):
     return check_password_hash(self.password_hash, password)
   
-  def is_duplicate_username(self):
-    return User.query.filter_by(username = self.username).first() is not None
+  def is_duplicate_username(username):
+    return User.query.filter_by(username = username).first() is not None
   
-  def is_duplicate_nickname(self):
-    return User.query.filter_by(nickname = self.nickname).first() is not None
+  def is_duplicate_nickname(nickname):
+    return User.query.filter_by(nickname = nickname).first() is not None
   
-  def is_duplicate_email(self):
-    return User.query.filter_by(email = self.email).first() is not None
+  def is_duplicate_email(email):
+    return User.query.filter_by(email = email).first() is not None
   
