@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify,request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -44,24 +44,28 @@ def create_app():
             # 정상적인 데이터 반환
             return jsonify({"message": "데이터 호출 성공"})
         
-    @app.route('/api/place-card', methods=['GET'])
-    def placeCard():
+    @app.route('/api/place-cards', methods=['GET'])
+    def placeCards():
         try:
-            # DB에서 랜덤한 레코드를 하나 꺼내옴
-            random_place = db.session.query(PlayAreas).order_by(db.func.random()).first()
+            print('test')
+            count = int(request.args.get('count', 10))  # 기본 10개 가져오기
+            max_id = db.session.query(db.func.max(PlayAreas.id)).scalar()
+            random_places = db.session.query(PlayAreas).filter(
+                PlayAreas.id >= db.func.floor(db.func.random() * max_id)
+            ).limit(count).all()
 
+            places_data = []
             # 레코드가 존재하면 해당 레코드를 JSON 형태로 반환
-            if random_place:
-                image_url = get_naver_image_thumbnail(random_place.pfctNm)
-                place_data = random_place.to_dict()
+            for place in random_places:
+                image_url = get_naver_image_thumbnail(place.pfctNm)
+                place_data = place.to_dict()
                 place_data['thumbnail'] = image_url if image_url else '/images/thumb.jpg'
+                places_data.append(place_data)
 
-                return jsonify(place_data), 200  # 랜덤 레코드 반환
-            else:
-                return jsonify({"message": "No records found."}), 404  # 레코드가 없을 경우
+            return jsonify(places_data), 200
+
         except Exception as e:
-            return jsonify({"error": str(e)}), 500  # 예외 처리      
-
+            return jsonify({"error": str(e)}), 500
 
     return app
 

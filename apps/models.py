@@ -3,7 +3,7 @@ from apps.app import db
 class PlayAreas(db.Model):
     __tablename__ = 'play_areas'  # 테이블 이름 정의
     
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # 기본 키
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True,index=True)  # 기본 키
     pfctNm = db.Column(db.String(255), nullable=False)  # 시설 이름
     pfctSn = db.Column(db.String(50), nullable=False)  # 시설 고유 번호
     instlPlaceCdNm = db.Column(db.String(255), nullable=True)  # 설치 장소 코드 이름
