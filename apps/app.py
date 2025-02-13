@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from apps.insertData import insert_data_to_db
 from apps.naver_image_api import get_naver_image_thumbnail
+from apps.dust import get_nearest_station
 
 
 db = SQLAlchemy()
@@ -64,6 +65,17 @@ def create_app():
             return jsonify(places_data), 200
 
         except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        
+    @app.route('/api/place-dust', methods=['GET'])
+    def placeDustName():
+        try:
+            print("🟢 [API 요청] /api/place-dust 호출됨")
+            data = get_nearest_station()
+            print("🟢 [API 응답] /api/place-dust 완료됨")
+            return jsonify(data) if isinstance(data, list) else jsonify(data), 500
+        except Exception as e:
+            print(f"❌ /api/place-dust 에러 발생: {e}")
             return jsonify({"error": str(e)}), 500
 
     return app
