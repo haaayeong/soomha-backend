@@ -9,12 +9,15 @@ import os
 config_key = os.environ.get('FLASK_CONFIG_KEY')
 
 db = SQLAlchemy()
+mail = Mail()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, origins=["http://localhost:5173"])  # React에서 Flask API 호출 허용
+    CORS(app)  # React에서 Flask API 호출 허용
 
     app.config.from_object(config[config_key])
+
+    mail.init_app(app)
 
     db.init_app(app)
     Migrate(app, db)

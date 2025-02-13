@@ -1,8 +1,9 @@
-from flask import Blueprint,request,jsonify
+from flask import Blueprint, request, jsonify, session
 from apps.crud.models import db, User, Level
 from apps.crud.enums import UserRole
 from apps.crud.forms import UserForm
-from apps.crud.utils import send_verification_eamil
+from apps.crud.utils import send_verification_email
+from datetime import datetime, timedelta
 
 bp = Blueprint("crud", __name__, static_folder="static")
 
@@ -106,23 +107,26 @@ def check_nickname():
 # 이메일 인증번호 전송 API
 @bp.route('/send_email_code', methods=['POST'])
 def send_email_code():
-  data = request.get_json()
-  email = data.get('email')
+    data = request.get_json()
+    email = data.get('email')
 
-  # 이메일이 제공되지 않은 경우 처리
-  if not email:
-    return jsonify({"error": "이메일 주소를 제공해주세요."}), 400
-  
-  # 이메일로 인증번호 전송
-  verification_code = send_verification_eamil(email)
+    # 이메일이 제공되지 않은 경우 처리
+    if not email:
+        return jsonify({"error": "이메일 주소를 입력해주세요."}), 400
 
-  if verification_code:
-    # 인증번호를 임시 저장
-    global stored_verification_code
-    stored_verification_code = verification_code
-    return jsonify({"message": "인증번호가 이메일로 전송되었습니다."}), 200
-  else:
-    return jsonify({"error": "이메일 전송 실패"}), 500
+    # 이메일로 인증번호 전송
+    verification_code = send_verification_email(email)
+
+    if verification_code:
+        # 인증번호를 Flask 세션에 저장 (보안 강화)
+        session['verification_code'] = verification_code  
+        session['verification_email'] = email
+        session['verification_time'] = datetime.now()
+        session.modified = True  # 세션 업데이트 반영
+
+        return jsonify({"message": "인증번호가 이메일로 전송되었습니다."}), 200
+    else:
+        return jsonify({"error": "이메일 전송 실패"}), 500
 
   
 # 인증번호 검증 API
@@ -134,9 +138,24 @@ def verify_email():
   # 인증번호 입력되지 않은 경우 처리
   if not input_code:
       return jsonify({"error": "인증번호를 입력해주세요."}), 400
+  
+  # 세션에서 저장된 인증번호와 시간 가져오기
+  stored_verification_code = session.get('verification_code')
+  stored_time = session.get('verification_timem')
+
+  # 세션에 인증번호가 없는 경우
+  if not stored_verification_code or not stored_time:
+     return jsonify({"error": "인증번호가 전송되지 않았습니다. 다시 시도해주세요."})
+  
+  # 인증번호 만료 시간 설정 (10분 후 만료)
+  expiration_time = timedelta(minutes=10)
+
+  # 현재 시간과 인증번호 발송 시간 차이 계산
+  if datetime.now() - stored_time > expiration_time:
+     return jsonify({"error": "인증번호가 만료되었습니다. 다시 시도해주세요."}), 400
 
   # 인증번호 검증
-  if input_code == stored_verification_code:
+  if input_code == str(stored_verification_code):
       return jsonify({"message": "인증번호가 확인되었습니다."}), 200
   else:
       return jsonify({"error": "인증번호가 일치하지 않습니다."}), 400
