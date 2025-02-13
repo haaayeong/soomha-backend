@@ -32,7 +32,7 @@ class UserForm(FlaskForm):
         ]
     )
 
-    confirm_password = PasswordField(
+    confirmPassword = PasswordField(
         validators=[
             DataRequired(message="비밀번호 확인을 입력하세요."),
             EqualTo("password", message="비밀번호가 일치하지 않습니다.")
@@ -45,7 +45,7 @@ class UserForm(FlaskForm):
         ]
     )
 
-    email_code = IntegerField(
+    emailCode = IntegerField(
         validators=[
             DataRequired(message="인증번호를 입력하세요.")
         ]
@@ -60,11 +60,5 @@ class UserForm(FlaskForm):
 
         validators=[
             DataRequired(message="가입 유형을 선택하세요.")
-        ]
-    )
-
-    area = SelectField(
-        validators=[
-            DataRequired(message="지역을 선택하세요.")
         ]
     )

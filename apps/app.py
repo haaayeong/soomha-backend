@@ -14,6 +14,7 @@ mail = Mail()
 def create_app():
     app = Flask(__name__)
     CORS(app)  # React에서 Flask API 호출 허용
+    app.config['WTF_CSRF_ENABLED'] = False
 
     app.config.from_object(config[config_key])
 

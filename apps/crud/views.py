@@ -4,6 +4,7 @@ from apps.crud.enums import UserRole
 from apps.crud.forms import UserForm
 from apps.crud.utils import send_verification_email
 from datetime import datetime, timedelta
+from werkzeug.datastructures import MultiDict
 
 bp = Blueprint("crud", __name__, static_folder="static")
 
@@ -12,8 +13,8 @@ stored_verification_code = None
 @bp.route('/signup', methods=["POST"])
 def signup():
   data = request.get_json()
-
-  form = UserForm(data)
+  print("이거임" ,data)
+  form = UserForm(MultiDict(data))
 
   # 폼이 유효한지 확인
   if not form.validate():
@@ -21,30 +22,37 @@ def signup():
     for field, messages in form.errors.items():
       for message in messages:
         errors.append(f"{field}: {message}")
+        print(f"{field}: {message}")
     return jsonify({"error": errors}), 400
     
   # 비밀번호 확인
   if data['password'] != data['confirmPassword']:
-    return jsonify({"error": "비밀번호가 일치하지 않습니다."}), 40
+    return jsonify({"error": "비밀번호가 일치하지 않습니다."}), 400
+  print("비밀번호")
 
   # 닉네임 중복 확인
-  if User.is_duplicate_username(data['nickname']):
+  if User.is_duplicate_nickname(data['nickname']):
     return jsonify({"error": "중복된 닉네임입니다."}), 400
+  print("닉네임")
   
   # 이메일 중복 확인
   if User.is_duplicate_email(data['email']):
     return jsonify({'error': "중복된 이메일입니다."}), 400
+  print("이메일")
   
   # 기본 역할 설정
-  if data['role'] not in [role.name for role in UserRole]:
+  if data['role'] not in [role.value for role in UserRole]:
     return jsonify({"error": "유효하지 않은 가입유형입니다."}), 400
+  print("역할")
   
   # 선생님일 경우 유치원 이름 확인
   if data['role'] == "teacher" and not data.get('kindergarten'):
     return jsonify({"error" : "소속 유치원 이름을 작성해주세요"})
+  print("선생님")
   
   # 레벨 정보 가져오기 (기본 레벨 설정)
   level = Level.query.filter_by(name="어린이").first()
+  print("레벨")
 
   # User 객체 생성
   new_user = User(
