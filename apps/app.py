@@ -47,7 +47,6 @@ def create_app():
     @app.route('/api/place-cards', methods=['GET'])
     def placeCards():
         try:
-            print('test')
             count = int(request.args.get('count', 10))  # 기본 10개 가져오기
             max_id = db.session.query(db.func.max(PlayAreas.id)).scalar()
             random_places = db.session.query(PlayAreas).filter(
