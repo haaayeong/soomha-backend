@@ -82,12 +82,13 @@ def check_email():
   email = request.args.get('email')
 
   if not email:
-    return jsonify({"error": "이메일을 입력해주세요."}), 400
+    return jsonify({"isAvailable": False, "error": "이메일을 입력해주세요."}), 400
   
   if User.is_duplicate_email(email):
-    return jsonify({"error": "중복된 이메일입니다."}), 400
+    return jsonify({"isAvailable": False, "error": "중복된 이메일입니다."}), 400
   
-  return jsonify({"message": "사용 가능한 이메일입니다."}), 200
+  return jsonify({"isAvailable": True, "message": "사용 가능한 이메일입니다."}), 200
+
 
 # 닉네임 중복 확인
 @bp.route('/check-nickname', methods=["GET"])
