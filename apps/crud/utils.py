@@ -46,8 +46,6 @@ def send_verification_email(email):
         server.sendmail(sender_email, email, msg.as_string())
         server.quit()
 
-        print(f"✅ 이메일 전송 성공: {email} (코드: {verification_code})")
         return verification_code  # 인증번호 반환 (임시 저장)
     except Exception as e:
-        print(f"❌ 이메일 전송 실패: {email}/{e}")
         return None

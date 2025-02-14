@@ -57,7 +57,7 @@ def signup():
   # User 객체 생성
   new_user = User(
     username=data['username'],
-    password_hash=data['password'],
+    password=data['password'],
     nickname=data['nickname'],
     email=data['email'],
     role=data['role'],
@@ -93,10 +93,13 @@ def check_email():
   if not email:
     return jsonify({"isAvailable": False, "error": "이메일을 입력해주세요."}), 400
   
-  if User.is_duplicate_email(email):
-    return jsonify({"isAvailable": False, "error": "중복된 이메일입니다."}), 400
-  
-  return jsonify({"isAvailable": True, "message": "사용 가능한 이메일입니다."}), 200
+  try:
+     if User.is_duplicate_email(email):
+        return jsonify({"isAvailable": False, "error": "이미 사용중인 이메일입니다."}), 200
+     return jsonify({"isAvailable": True, "message": "사용 가능한 이메일입니다."}), 200
+  except Exception as e:
+     print(f"이메일 중복 확인 오류: {e}")
+     return jsonify({"isAvailable": False, "error": "서버 오류가 발생했습니다."}), 500
 
 
 # 닉네임 중복 확인
@@ -107,7 +110,7 @@ def check_nickname():
   if not nickname:
     return jsonify({"error": "닉네임을 입력해주세요."}), 400
   
-  if User.is_duplicate_username(nickname):
+  if User.is_duplicate_nickname(nickname):
     return jsonify({"error": "중복된 닉네임입니다."}), 400
   
   return jsonify({"message": "사용 가능한 닉네임입니다."}), 200
@@ -130,7 +133,13 @@ def send_email_code():
         session['verification_code'] = verification_code  
         session['verification_email'] = email
         session['verification_time'] = datetime.now()
+
         session.modified = True  # 세션 업데이트 반영
+
+        # 세션 객체 출력 (디버깅용)
+        print(f"Stored verification code in session: {session.get('verification_code')}")
+        print(f"Stored verification email in session: {session.get('verification_email')}")
+        print(f"Stored time in session: {session.get('verification_time')}")
 
         return jsonify({"message": "인증번호가 이메일로 전송되었습니다."}), 200
     else:
@@ -140,6 +149,9 @@ def send_email_code():
 # 인증번호 검증 API
 @bp.route('/verify_email_code', methods=['POST'])
 def verify_email():
+  # 세션에 저장된 모든 데이터 출력
+  print("현재 세션 데이터: ", session)
+
   data = request.get_json()
   input_code = data.get('emailCode')
 
@@ -149,7 +161,10 @@ def verify_email():
   
   # 세션에서 저장된 인증번호와 시간 가져오기
   stored_verification_code = session.get('verification_code')
-  stored_time = session.get('verification_timem')
+  stored_time = session.get('verification_time')
+
+  print(f"저장된 인증번호 : {stored_verification_code}")
+  print(f"저장된 시간 : {stored_time}")
 
   # 세션에 인증번호가 없는 경우
   if not stored_verification_code or not stored_time:
@@ -163,7 +178,7 @@ def verify_email():
      return jsonify({"error": "인증번호가 만료되었습니다. 다시 시도해주세요."}), 400
 
   # 인증번호 검증
-  if input_code == str(stored_verification_code):
+  if str(input_code) == str(stored_verification_code):
       return jsonify({"message": "인증번호가 확인되었습니다."}), 200
   else:
       return jsonify({"error": "인증번호가 일치하지 않습니다."}), 400
