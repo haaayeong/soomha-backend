@@ -65,7 +65,7 @@ def get_nearest_station(rgnCdNm):
     print(f"✅ 조회된 근접 측정소: {station_data['response']['body']['items']}")
     air_quality = get_air_quality(station_data["response"]["body"]["items"][0]["stationName"])
     
-    if isinstance(air_quality, dict) and 'error' in air_quality:
+    if 'error' in air_quality:
         print(f"❌ 첫 번째 측정소에서 에러 발생: {air_quality['error']}. 두 번째 측정소로 재시도.")
         air_quality = get_air_quality(station_data["response"]["body"]["items"][1]["stationName"])
 
@@ -91,18 +91,18 @@ def get_air_quality(station_name):
         data = response.json()
     except Exception as e:
         print(f"❌ JSON 변환 오류: {e}")
-        return {"error": "응답이 올바른 JSON 형식이 아닙니다."}, 500
+        return {"error": "응답이 올바른 JSON 형식이 아닙니다."}
 
     # 4️⃣ API 응답 오류 확인
     if data["response"]["header"]["resultCode"] != "00":
         print(f"❌ API 호출 실패: {data['response']['header']['resultMsg']}")
-        return {"error": "미세먼지 데이터를 가져오는 데 실패했습니다."}, 500
+        return {"error": "미세먼지 데이터를 가져오는 데 실패했습니다."}
 
     # 5️⃣ 데이터 파싱
     items = data["response"]["body"]["items"]
     if not items:
         print("❌ 오늘 날짜의 미세먼지 데이터가 없습니다.")
-        return {"error": "오늘 날짜의 미세먼지 데이터가 없습니다."}, 404
+        return {"error": "오늘 날짜의 미세먼지 데이터가 없습니다."}
     
     latest_data = items[0]
 
