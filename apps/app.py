@@ -73,16 +73,33 @@ def create_app():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         
-    # @app.route('/api/placeDust', methods=['GET'])
-    # def placeDustName():
-    #     try:
-    #         print("🟢 [API 요청] /api/place-dust 호출됨")
-    #         data = get_nearest_station()
-    #         print("🟢 [API 응답] ",data)
-    #         return jsonify(data), 200
-    #     except Exception as e:
-    #         print(f"❌ /api/place-dust 에러 발생: {e}")
-    #         return jsonify({"error": str(e)}), 500
+    @app.route('/api/place-detail/<int:id>', methods=['GET'])
+    def place_detail(id):
+        try:
+            # ID에 해당하는 데이터 조회
+            place = db.session.query(PlayAreas).filter_by(id=id).first()
+            print("🟢 [장소 상세] ",place)
+
+            if not place:
+                return jsonify({"error": "해당 ID의 장소를 찾을 수 없습니다."}), 404
+
+            # 기본 데이터 구성
+            place_data = place.to_dict()
+
+            # 네이버 이미지 썸네일 추가
+            image_url = get_naver_image_thumbnail(place.pfctNm, count=7)
+            place_data['thumbnail'] = image_url if image_url else '/images/noImage.jpg'
+
+            # 미세먼지 정보 추가
+            air_quality = get_nearest_station(place.rgnCdNm)
+            place_data['pm10'] = air_quality.get('pm10')  # 미세먼지 (PM10)
+            place_data['pm25'] = air_quality.get('pm25')  # 초미세먼지 (PM2.5)
+
+            return jsonify(place_data), 200
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 
     return app
 
