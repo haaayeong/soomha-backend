@@ -59,7 +59,7 @@ def create_app():
             for place in random_places:
                 image_url = get_naver_image_thumbnail(place.pfctNm)
                 place_data = place.to_dict()
-                place_data['thumbnail'] = image_url if image_url else '/images/thumb.jpg'
+                place_data['thumbnail'] = image_url if image_url else '/images/noImage.jpg'
 
                 air_quality = get_nearest_station(place.rgnCdNm)
                 print("🟢 [API 응답] ",air_quality)

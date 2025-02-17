@@ -65,7 +65,7 @@ def get_nearest_station(rgnCdNm):
     print(f"✅ 조회된 근접 측정소: {station_data['response']['body']['items']}")
     air_quality = get_air_quality(station_data["response"]["body"]["items"][0]["stationName"])
     
-    if 'error' in air_quality:
+    if isinstance(air_quality, dict) and 'error' in air_quality:
         print(f"❌ 첫 번째 측정소에서 에러 발생: {air_quality['error']}. 두 번째 측정소로 재시도.")
         air_quality = get_air_quality(station_data["response"]["body"]["items"][1]["stationName"])
 
