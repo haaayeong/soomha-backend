@@ -60,6 +60,12 @@ def create_app():
                 image_url = get_naver_image_thumbnail(place.pfctNm)
                 place_data = place.to_dict()
                 place_data['thumbnail'] = image_url if image_url else '/images/thumb.jpg'
+
+                air_quality = get_nearest_station(place.rgnCdNm)
+                print("🟢 [API 응답] ",air_quality)
+                place_data['pm10'] = air_quality.get('pm10')  # pm10 값
+                place_data['pm25'] = air_quality.get('pm25')
+
                 places_data.append(place_data)
 
             return jsonify(places_data), 200
@@ -67,16 +73,16 @@ def create_app():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         
-    @app.route('/api/place-dust', methods=['GET'])
-    def placeDustName():
-        try:
-            print("🟢 [API 요청] /api/place-dust 호출됨")
-            data = get_nearest_station()
-            print("🟢 [API 응답] /api/place-dust 완료됨")
-            return jsonify(data) if isinstance(data, list) else jsonify(data), 500
-        except Exception as e:
-            print(f"❌ /api/place-dust 에러 발생: {e}")
-            return jsonify({"error": str(e)}), 500
+    # @app.route('/api/placeDust', methods=['GET'])
+    # def placeDustName():
+    #     try:
+    #         print("🟢 [API 요청] /api/place-dust 호출됨")
+    #         data = get_nearest_station()
+    #         print("🟢 [API 응답] ",data)
+    #         return jsonify(data), 200
+    #     except Exception as e:
+    #         print(f"❌ /api/place-dust 에러 발생: {e}")
+    #         return jsonify({"error": str(e)}), 500
 
     return app
 
