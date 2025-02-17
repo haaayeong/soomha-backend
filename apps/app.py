@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -18,18 +18,24 @@ jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)  # React에서 Flask API 호출 허용
+    CORS(app, supports_credentials=True, resources={r'/*' : {'origins' : ['http://localhost:5173', 'http://127.0.0.1:5173']}})  # React에서 Flask API 호출 허용
     app.config['WTF_CSRF_ENABLED'] = False
 
     app.config.from_object(config['local'])
 
+    app.config['JWT_SECRET_KEY'] = 'abcd'
+
     # 세션과 관련된 설정
-    app.secret_key= app.config['SECRET_KEY']
+    # app.secret_key= app.config['SECRET_KEY']
+    app.secret_key = 'abcd'
     app.config['SESSION_TYPE'] = 'filesystem'
     app.config['SESSION_PERMANENT'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     app.config['SESSION_USE_SIGNER'] = True
     app.config['SESSION_FILE_DIR'] = "./flask_session"
+
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = False
     Session(app)
 
     mail.init_app(app)
