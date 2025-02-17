@@ -51,4 +51,3 @@ class User(db.Model):
   
   def is_duplicate_email(email):
     return User.query.filter_by(email = email).first() is not None
-  

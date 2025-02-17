@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_session import Session
 from flask_jwt_extended import JWTManager
+from datetime import timedelta
 
 from apps.config import config
 import os
@@ -25,10 +26,10 @@ def create_app():
     # 세션과 관련된 설정
     app.secret_key= app.config['SECRET_KEY']
     app.config['SESSION_TYPE'] = 'filesystem'
-    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_PERMANENT'] = True
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     app.config['SESSION_USE_SIGNER'] = True
     app.config['SESSION_FILE_DIR'] = "./flask_session"
-
     Session(app)
 
     mail.init_app(app)

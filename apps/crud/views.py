@@ -28,31 +28,27 @@ def signup():
   # 비밀번호 확인
   if data['password'] != data['confirmPassword']:
     return jsonify({"error": "비밀번호가 일치하지 않습니다."}), 400
-  print("비밀번호")
 
   # 닉네임 중복 확인
   if User.is_duplicate_nickname(data['nickname']):
     return jsonify({"error": "중복된 닉네임입니다."}), 400
-  print("닉네임")
   
   # 이메일 중복 확인
   if User.is_duplicate_email(data['email']):
     return jsonify({'error': "중복된 이메일입니다."}), 400
-  print("이메일")
   
   # 기본 역할 설정
   if data['role'] not in [role.value for role in UserRole]:
     return jsonify({"error": "유효하지 않은 가입유형입니다."}), 400
-  print("역할")
   
   # 선생님일 경우 유치원 이름 확인
   if data['role'] == "teacher" and not data.get('kindergarten'):
     return jsonify({"error" : "소속 유치원 이름을 작성해주세요"})
-  print("선생님")
   
   # 레벨 정보 가져오기 (기본 레벨 설정)
   level = Level.query.filter_by(name="어린이").first()
-  print("레벨")
+  if not level:
+     return jsonify({"error": "기본 레벨 정보가 없습니다. 관리자에게 문의하세요."})
 
   # User 객체 생성
   new_user = User(
@@ -167,11 +163,15 @@ def verify_email():
   print(f"저장된 시간 : {stored_time}")
 
   # 세션에 인증번호가 없는 경우
-  if not stored_verification_code or not stored_time:
+  if not stored_time:
      return jsonify({"error": "인증번호가 전송되지 않았습니다. 다시 시도해주세요."})
   
   # 인증번호 만료 시간 설정 (10분 후 만료)
   expiration_time = timedelta(minutes=10)
+
+  # stored_time을 datetime 객체로 변환 (세션이 문자열로 저장할 가능성 방지)
+  if isinstance(stored_time, str):
+     stored_time = datetime.fromisoformat(stored_time)
 
   # 현재 시간과 인증번호 발송 시간 차이 계산
   if datetime.now() - stored_time > expiration_time:

@@ -28,22 +28,33 @@ def login():
 
 # 로그인한 사용자 정보 조회
 @bp.route("/user", methods=["GET"])
-@jwt_required()
+@jwt_required(optional=True)
 def get_user():
-  user_id = get_jwt_identity()
-  user = User.query.get(user_id)
+  print("안녕")
+  try:
+      user_id = get_jwt_identity()
+      print("이거임 user_id : ", user_id)
 
-  if not user:
-    return jsonify({"error": "사용자를 찾을 수 없습니다."}), 404
-  
-  return jsonify({
-    "id": user.id,
-    "username": user.username,
-    "profile_image": user.profile_image,
-    "nickname": user.nickname,
-    "email" : user.email,
-    "kindergarten" : user.kindergarten,
-    "stamp" : user.stamp,
-    "level_id" : user.level_id,
-    "area" : user.area
-  }), 200
+      if not user_id:
+          return jsonify({"error": "유효하지 않은 토큰"}), 401
+
+      user = User.query.get(user_id)
+      print("user:", user)
+
+      if not user:
+          return jsonify({"error": "사용자를 찾을 수 없습니다."}), 404
+
+      return jsonify({
+          "id": user.id,
+          "username": user.username,
+          "profile_image": user.profile_image,
+          "nickname": user.nickname,
+          "role": user.role.name,
+          "email": user.email,
+          "stamp": user.stamp,
+          "level": user.level.name if user.role.name == "children" else None,
+          "area": user.area
+      }), 200
+  except Exception as e:
+      print("🚨 오류 발생:", str(e))  # 콘솔에서 오류 확인 가능
+      return jsonify({"error": str(e)}), 500
