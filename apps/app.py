@@ -2,6 +2,10 @@ from flask import Flask, jsonify,request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
+from datetime import datetime, timedelta
+import random
+
 from apps.insertData import insert_data_to_db
 from apps.naver_image_api import get_naver_image_thumbnail
 from apps.dust import get_nearest_station
@@ -142,41 +146,94 @@ def create_app():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         
+
+
     @app.route('/api/place-cards-scroll', methods=['GET'])
     def placeCardsScroll():
         try:
-            # 페이징 처리용 파라미터
-            count = int(request.args.get('count', 10))  # 요청 시 가져올 데이터 개수 (기본값 10)
-            offset = int(request.args.get('offset', 0))  # 시작 인덱스 (기본값 0)
+            # 📌 페이징 처리용 파라미터
+            count = int(request.args.get('count', 10))  # 가져올 데이터 개수
+            offset = int(request.args.get('offset', 0))  # 시작 인덱스
 
-            # 장소 데이터 조회
+            # 📌 필터 값 받아오기
+            dust_level = request.args.get('dust', 'all')  # 미세먼지 농도
+            category = request.args.get('category', 'all')  # 카테고리
+            indoorOutdoor = request.args.get('indoorOutdoor', 'all')  # 실내/실외
+            is_next_week = request.args.get('isNextWeek', 'false').lower() == 'true'  # 다음주 여부
+
+            print(f'🟢 [필터 정보] dust: {dust_level}, category: {category}, indoorOutdoor: {indoorOutdoor}, isNextWeek: {is_next_week}')
+
+            # 📌 기본 쿼리 생성 (미세먼지는 DB에서 필터링하지 않음)
+            query = db.session.query(PlayAreas)
+
+            # 📌 카테고리 필터 적용
+            if category != 'all':
+                query = query.filter(PlayAreas.instlPlaceCdNm == category)
+
+            # 📌 실내/실외 필터 적용
+            if indoorOutdoor != 'all':
+                query = query.filter(db.func.lower(PlayAreas.idrodrCdNm) == indoorOutdoor.lower())
+
+            # 📌 랜덤으로 장소 데이터 조회
             places_data = []
-            candidate_places = db.session.query(PlayAreas).offset(offset).limit(count).all()
+            candidate_places = query.order_by(db.func.random()).offset(offset).limit(count).all()
 
             for place in candidate_places:
-
-                # air_quality = get_nearest_station(place.rgnCdNm)
+                # 📌 실시간 미세먼지 데이터 조회 (API 호출)
+                # air_quality = get_nearest_station(place.rgnCdNm)  # API에서 미세먼지 데이터 가져오기
                 air_quality = {
-                    "pm10": 10,
-                    "pm25": 5
+                    'pm10': random.randint(0, 150),  # pm10 값을 0~150 범위의 랜덤 값으로 설정
+                    'pm25': random.randint(0, 75)    # pm25 값을 0~75 범위의 랜덤 값으로 설정
                 }
-                if not air_quality:
-                    continue  # air_quality가 없으면 이 장소는 건너뜀
 
+                if not air_quality:
+                    continue  # air_quality 데이터가 없으면 해당 장소 제외
+
+                pm10 = air_quality.get('pm10')
+                pm25 = air_quality.get('pm25')
+
+                 # 📌 pm10이 유효한 값인지 확인하고, 유효하지 않으면 필터링
+                if pm10 == '-' or pm10 is None:
+                    continue  # 미세먼지 값이 유효하지 않으면 해당 장소 제외
+
+                pm10 = float(pm10)  # pm10을 float로 변환
+
+                # 📌 미세먼지 필터 적용 (여기서 필터링)
+                if dust_level != 'all':
+                    dust_mapping = {
+                        'good': (0, 30),
+                        'normal': (31, 80),
+                        'bad': (81, 150),
+                        'very-bad': (151, 999)
+                    }
+
+                    # 📌 dust_level에 맞는 PM10 값 범위 확인
+                    min_pm10, max_pm10 = dust_mapping.get(dust_level, (None, None))
+
+                    if min_pm10 is not None and max_pm10 is not None:
+                        # ✅ 미세먼지 수치가 해당 범위 내에 있는지 확인
+                        if not (min_pm10 <= pm10 <= max_pm10):
+                            continue  # 필터 조건을 만족하지 않으면 제외
+
+
+                # 📌 이미지 URL 가져오기
                 image_url = get_naver_image_thumbnail(place.pfctNm)
+
+                # 📌 최종 데이터 정리
                 place_data = place.to_dict()
                 place_data['thumbnail'] = image_url if image_url else '/images/noImage.jpg'
-                place_data['pm10'] = air_quality.get('pm10')
-                place_data['pm25'] = air_quality.get('pm25')
+                place_data['pm10'] = pm10
+                place_data['pm25'] = pm25
 
                 places_data.append(place_data)
 
-            # 최종 데이터 반환
+            # 📌 최종 데이터 반환
             return jsonify(places_data), 200
 
         except Exception as e:
-            print(f"Error: {str(e)}")
+            print(f"❌ Error: {str(e)}")
             return jsonify({"error": str(e)}), 500
+
 
 
 

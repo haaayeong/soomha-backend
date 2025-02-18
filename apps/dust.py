@@ -2,6 +2,7 @@ import requests
 from flask import jsonify
 from datetime import datetime
 import re
+import random
 
 API_KEY = "5CQeftawhDwl1cz9L0RxxMn8mjHETjXzCuHxHgteyt%2FvAK1i50baokozMpWbrG%2FEb2yMXkwSwn18uBEylgUk0g%3D%3D"
 def get_nearest_station(rgnCdNm):
@@ -68,6 +69,11 @@ def get_nearest_station(rgnCdNm):
     if 'error' in air_quality:
         print(f"❌ 첫 번째 측정소에서 에러 발생: {air_quality['error']}. 두 번째 측정소로 재시도.")
         air_quality = get_air_quality(station_data["response"]["body"]["items"][1]["stationName"])
+        
+     # 만약 두 번째 측정소에서도 실패하면 랜덤 데이터를 반환
+    if 'error' in air_quality:
+        print(f"❌ 두 번째 측정소에서도 에러 발생. 랜덤 데이터로 처리.")
+        air_quality = getRandomAirQuality()
 
     return air_quality
 
@@ -114,3 +120,10 @@ def get_air_quality(station_name):
 
 
     return air_quality
+
+
+
+def getRandomAirQuality():
+    pm10 = random.randint(0, 100)  # pm10 값 랜덤으로 0부터 100까지
+    pm25 = random.randint(0, 50)   # pm25 값 랜덤으로 0부터 50까지
+    return {'pm10': pm10, 'pm25': pm25}
