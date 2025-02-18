@@ -54,7 +54,7 @@ def get_user():
           "role": user.role.name,
           "email": user.email,
           "stamp": user.stamp,
-          "level": user.level.name if user.role.name == "children" else None,
+          "level": user.level.name if user.role.name == "CHILD" else None,
           "area": user.area
       }), 200
   except Exception as e:
