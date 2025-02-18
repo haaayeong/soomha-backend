@@ -17,7 +17,7 @@ mail = Mail()
 jwt = JWTManager()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static')
     CORS(app, supports_credentials=True, resources={r'/*' : {'origins' : ['http://localhost:5173', 'http://127.0.0.1:5173']}})  # React에서 Flask API 호출 허용
     app.config['WTF_CSRF_ENABLED'] = False
 
@@ -35,7 +35,7 @@ def create_app():
     app.config['SESSION_FILE_DIR'] = "./flask_session"
 
     app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-    app.config['SESSION_COOKIE_SECURE'] = False
+    app.config['SESSION_COOKIE_SECURE'] = True
     Session(app)
 
     mail.init_app(app)

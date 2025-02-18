@@ -16,7 +16,7 @@ class User(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   username = db.Column(db.String(50), unique=True, index=True, nullable=False )
   password_hash = db.Column(db.String(255), nullable=False)
-  profile_image = db.Column(db.String(255), nullable=False, default='/static/images/default_profile.png')
+  profile_image = db.Column(db.String(255), nullable=False, default='../src/user/static/images/default_profile.png.png')
   nickname = db.Column(db.String(150), nullable=False, unique=True)
   email = db.Column(db.String(100), unique=True, index=True, nullable=False)
   role = db.Column(db.Enum(UserRole), nullable=False)
