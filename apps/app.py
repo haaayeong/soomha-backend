@@ -61,7 +61,11 @@ def create_app():
             for place in candidate_places:
                 if len(low_pm_places) >= 5:
                     break
-                air_quality = get_nearest_station(place.rgnCdNm)
+                # air_quality = get_nearest_station(place.rgnCdNm)
+                air_quality = {
+                    'pm10': random.randint(0, 150),  # pm10 값을 0~150 범위의 랜덤 값으로 설정
+                    'pm25': random.randint(0, 75)    # pm25 값을 0~75 범위의 랜덤 값으로 설정
+                }
                 if not air_quality:
                     continue  # air_quality가 없으면 이 장소는 건너뜀
 
@@ -97,7 +101,11 @@ def create_app():
                 random_places_query = query.order_by(db.func.random()).limit(remaining_count).all()
 
                 for place in random_places_query:
-                    air_quality = get_nearest_station(place.rgnCdNm)
+                    # air_quality = get_nearest_station(place.rgnCdNm)
+                    air_quality = {
+                    'pm10': random.randint(0, 150),  # pm10 값을 0~150 범위의 랜덤 값으로 설정
+                    'pm25': random.randint(0, 75)    # pm25 값을 0~75 범위의 랜덤 값으로 설정
+                }
                     if not air_quality:
                         continue  # air_quality가 없으면 이 장소는 건너뜀
 
@@ -137,7 +145,12 @@ def create_app():
             place_data['thumbnail'] = image_url if image_url else '/images/noImage.jpg'
 
             # 미세먼지 정보 추가
-            air_quality = get_nearest_station(place.rgnCdNm)
+            # air_quality = get_nearest_station(place.rgnCdNm)
+            air_quality = {
+                'pm10': random.randint(0, 150),  # pm10 값을 0~150 범위의 랜덤 값으로 설정
+                'pm25': random.randint(0, 75)    # pm25 값을 0~75 범위의 랜덤 값으로 설정
+            }
+            
             place_data['pm10'] = air_quality.get('pm10')  # 미세먼지 (PM10)
             place_data['pm25'] = air_quality.get('pm25')  # 초미세먼지 (PM2.5)
 
