@@ -18,14 +18,14 @@ def get_nearest_station(rgnCdNm):
         umd_name = rgnCdNm.split()[-2]  # '시' 또는 '구'만 추출
 
     # 2️⃣ TM 좌표 변환 API 요청
-    print(f"📡 TM 이름 변경: {umd_name}")
+    # print(f"📡 TM 이름 변경: {umd_name}")
 
     tm_url = f"http://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getTMStdrCrdnt?umdName={umd_name}&returnType=json&serviceKey={API_KEY}"
-    print(f"📡 TM 좌표 변환 API 요청: {tm_url}")
+    # print(f"📡 TM 좌표 변환 API 요청: {tm_url}")
 
     # API 호출
     tm_response = requests.get(tm_url)
-    print(f"🔹 TM 좌표 응답: {tm_response.text}")  # 응답 출력
+    # print(f"🔹 TM 좌표 응답: {tm_response.text}")  # 응답 출력
     if tm_response.json()['response']['body']['totalCount'] == 0:
         umd_name = rgnCdNm.split()[-2]
         tm_url = f"http://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getTMStdrCrdnt?umdName={umd_name}&returnType=json&serviceKey={API_KEY}"
@@ -43,14 +43,14 @@ def get_nearest_station(rgnCdNm):
 
     tm_x = tm_data["response"]["body"]["items"][0]["tmX"]
     tm_y = tm_data["response"]["body"]["items"][0]["tmY"]
-    print(f"✅ 변환된 TM 좌표: tmX={tm_x}, tmY={tm_y}")
+    # print(f"✅ 변환된 TM 좌표: tmX={tm_x}, tmY={tm_y}")
 
     # 2️⃣ 변환된 TM 좌표를 사용하여 근접 측정소 조회
     station_url = f"http://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getNearbyMsrstnList?tmX={tm_x}&tmY={tm_y}&returnType=json&serviceKey={API_KEY}"
-    print(f"📡 근접 측정소 API 요청: {station_url}")
+    # print(f"📡 근접 측정소 API 요청: {station_url}")
 
     station_response = requests.get(station_url)
-    print(f"🔹 근접 측정소 응답: {station_response.text}")  # 응답 출력
+    # print(f"🔹 근접 측정소 응답: {station_response.text}")  # 응답 출력
 
     try:
         station_data = station_response.json()
@@ -62,7 +62,7 @@ def get_nearest_station(rgnCdNm):
         print(f"❌ 근접 측정소 조회 실패: {station_data['response']['header']['resultMsg']}")
         return {"error": "근접 측정소 조회 실패"}, 500
 
-    print(f"✅ 조회된 근접 측정소: {station_data['response']['body']['items']}")
+    # print(f"✅ 조회된 근접 측정소: {station_data['response']['body']['items']}")
     air_quality = get_air_quality(station_data["response"]["body"]["items"][0]["stationName"])
     
     if 'error' in air_quality:
@@ -73,7 +73,7 @@ def get_nearest_station(rgnCdNm):
 
 
 def get_air_quality(station_name):
-    print(f"📡 미세먼지 정보를 가져올 측정소: {station_name}")
+    # print(f"📡 미세먼지 정보를 가져올 측정소: {station_name}")
     
 
  # 1️⃣ API 요청 URL 구성
@@ -82,7 +82,7 @@ def get_air_quality(station_name):
         f"?stationName={station_name}&returnType=json&numOfRows=3&pageNo=1&dataTerm=Daily"
         f"&serviceKey={API_KEY}&ver=1.3"
     )
-    print(f"📡 실시간 미세먼지 API 요청: {air_quality_url}")
+    # print(f"📡 실시간 미세먼지 API 요청: {air_quality_url}")
 
     # 3️⃣ API 요청 및 응답 확인
     response = requests.get(air_quality_url)
