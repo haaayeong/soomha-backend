@@ -56,8 +56,19 @@ def create_app():
     app.register_blueprint(crud_auth.bp, url_prefix='/auth')
 
     with app.app_context():
-        from apps.initialize import initialize_levels
-        initialize_levels()
+        from apps.crud.models import Level
+        from sqlalchemy.exc import OperationalError
+        from sqlalchemy import inspect
+
+        try:
+            inspector = inspect(db.engine)
+            # 테이블이 존재하는지 확인
+            if inspector.has_table('level'):
+                from apps.initialize import initialize_levels
+                initialize_levels()
+        except OperationalError:
+            print("테이블이 아직 생성되지 않았음. initialize_levels() 실행을 건너뜀.")
+        
     from apps.models import PlayAreas
 
     @app.route('/api/test', methods=['GET'])
