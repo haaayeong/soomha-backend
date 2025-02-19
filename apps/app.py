@@ -10,6 +10,8 @@ from apps.insertData import insert_data_to_db
 from apps.naver_image_api import get_naver_image_thumbnail
 from apps.dust import get_nearest_station
 
+import os
+from dotenv import load_dotenv
 
 db = SQLAlchemy()
 
@@ -19,7 +21,7 @@ def create_app():
 
     app.config.from_mapping(
         # mysql 연결
-        SQLALCHEMY_DATABASE_URI='mysql+mysqlconnector://root:1234@localhost:3306/soomha',
+        SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
 
         # SQLAlchemy가 변경 사항 추적하지 않도록 함.
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
