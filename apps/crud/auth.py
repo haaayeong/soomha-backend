@@ -11,8 +11,6 @@ def login():
   data = request.get_json()
   username = data.get("username")
   password = data.get("password")
-  print('아이디 : ', username)
-  print('비밀번호 : ', password)
 
   if not username or not password:
     return jsonify({"error": "아이디와 비밀번호를 입력하세요."}), 400
@@ -59,4 +57,43 @@ def get_user():
       }), 200
   except Exception as e:
       print("🚨 오류 발생:", str(e))  # 콘솔에서 오류 확인 가능
+      return jsonify({"error": str(e)}), 500
+  
+@bp.route('/update-user', methods=["PUT"])
+@jwt_required()
+def update_user():
+   try:
+      user_id = get_jwt_identity()
+      user = User.query.get(user_id)
+
+      if not user:
+         return jsonify({"error": "사용자를 찾을 수 없습니다."}), 404
+      
+      data = request.get_json()
+      user.nickname = data.get('nickname', user.nickname)
+      user.email = data.get('email', user.email)
+      user.kindergarten = data.get('kindergarten', user.kindergarten)
+      user.area = data.get('area', user.area)
+
+      db.session.commit()
+
+      return jsonify({"message": "수정 성공"}), 200
+   except Exception as e:
+      return jsonify({"error": str(e)}), 500
+   
+@bp.route('/delete-account', methods=["DELETE"])
+@jwt_required()
+def delete_account():
+   try:
+      user_id = get_jwt_identity()
+      user = User.query.get(user_id)
+
+      if not user:
+         return jsonify({"error": "사용자를 찾을 수 없습니다."}), 404
+      
+      db.session.delete(user)
+      db.session.commit()
+
+      return jsonify({"message": "탈퇴 성공"}), 200
+   except Exception as e:
       return jsonify({"error": str(e)}), 500
