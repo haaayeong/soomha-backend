@@ -77,7 +77,17 @@ def update_user():
 
       db.session.commit()
 
-      return jsonify({"message": "수정 성공"}), 200
+      return jsonify({
+          "id": user.id,
+          "username": user.username,
+          "profile_image": user.profile_image,
+          "nickname": user.nickname,
+          "role": user.role.name,
+          "email": user.email,
+          "stamp": user.stamp,
+          "level": user.level.name,
+          "area": user.area
+      }), 200
    except Exception as e:
       return jsonify({"error": str(e)}), 500
    
