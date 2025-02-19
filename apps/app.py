@@ -103,8 +103,8 @@ def create_app():
                 for place in random_places_query:
                     # air_quality = get_nearest_station(place.rgnCdNm)
                     air_quality = {
-                    'pm10': random.randint(0, 150),  # pm10 값을 0~150 범위의 랜덤 값으로 설정
-                    'pm25': random.randint(0, 75)    # pm25 값을 0~75 범위의 랜덤 값으로 설정
+                    'pm10': random.randint(0, 250),  
+                    'pm25': random.randint(0, 200)    # pm25 값을 0~75 범위의 랜덤 값으로 설정
                 }
                     if not air_quality:
                         continue  # air_quality가 없으면 이 장소는 건너뜀
