@@ -13,6 +13,7 @@ from apps.insertData import insert_data_to_db
 from apps.naver_image_api import get_naver_image_thumbnail
 from apps.dust import get_nearest_station
 from apps.config import config
+from apps.healthModel.useModel import predict_health_warning
 
 import os
 
@@ -285,7 +286,33 @@ def create_app():
             print(f"❌ Error: {str(e)}")
             return jsonify({"error": str(e)}), 500
 
+    @app.route('/api/healthWarning', methods=['GET'])
+    def healthWarning():
+        try:
+            # 요청에서 예측에 필요한 데이터 받기
+            gender = int(request.args.get('gender'))
+            region = int(request.args.get('region'))
+            age_group = int(request.args.get('age_group'))
+            year = int(request.args.get('year'))
+            month = int(request.args.get('month'))
+            pm25 = float(request.args.get('pm25'))
 
+
+            # 예측 함수 호출
+            predictions = predict_health_warning(gender, region, age_group, year, month, pm25)
+
+            # numpy.float32 를 float 형식으로 변환
+            predictions = {key: int(value) for key, value in predictions.items()}
+        
+            # 결과 반환
+            return jsonify(predictions), 200
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    if __name__ == '__main__':
+        app.run(debug=True)
+    
 
 
 
