@@ -17,7 +17,7 @@ def send_verification_email(email):
 
     if not all([smtp_server, smtp_port, sender_email, sender_password]):
         print("SMTP 설정이 올바르지 않습니다.")
-        return None
+        return None, "SMTP 설정 오류"
 
     # 6자리 인증번호 생성
     verification_code = random.randint(100000, 999999)
@@ -46,6 +46,12 @@ def send_verification_email(email):
         server.sendmail(sender_email, email, msg.as_string())
         server.quit()
 
-        return verification_code  # 인증번호 반환 (임시 저장)
+        return verification_code, None  # 인증번호 반환 (임시 저장)
+    except smtplib.SMTPRecipientsRefused:
+        return None, "존재하지 않는 이메일 주소입니다."
+    except smtplib.SMTPResponseException as e:
+        print("SMTP 오류 발생:", e)
+        return None, "이메일 전송 실패"
     except Exception as e:
-        return None
+        print("기타 이메일 전송 오류:", e)
+        return None, f"이메일 전송 실패: {str(e)}"

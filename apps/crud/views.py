@@ -122,24 +122,18 @@ def send_email_code():
         return jsonify({"error": "이메일 주소를 입력해주세요."}), 400
 
     # 이메일로 인증번호 전송
-    verification_code = send_verification_email(email)
+    verification_code, error_message = send_verification_email(email)
 
     if verification_code:
-        # 인증번호를 Flask 세션에 저장 (보안 강화)
         session['verification_code'] = verification_code  
         session['verification_email'] = email
         session['verification_time'] = datetime.now()
-
         session.modified = True  # 세션 업데이트 반영
-
-        # 세션 객체 출력 (디버깅용)
-        print(f"Stored verification code in session: {session.get('verification_code')}")
-        print(f"Stored verification email in session: {session.get('verification_email')}")
-        print(f"Stored time in session: {session.get('verification_time')}")
 
         return jsonify({"message": "인증번호가 이메일로 전송되었습니다."}), 200
     else:
-        return jsonify({"error": "이메일 전송 실패"}), 500
+        return jsonify({"error": error_message}), 400  # 에러 메시지를 반환
+
 
   
 # 인증번호 검증 API
