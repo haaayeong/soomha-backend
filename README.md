@@ -24,7 +24,7 @@ __프론트엔드 레포지토리__ : https://github.com/haaayeong/soomha-fronte
 - __프론트엔드__ : __React__, Axios, React Router Dom, React Query, React Leaflet, React Infinite Scroll Component, Font Awsome
   - __API__ : kakao API, 단기예보조회 API, 놀이시설 API<br>
 
-- __백엔드__ : __Flask__, Flask JWT extended, Flask WTF, WTForms, Werkzeug, SMTPlib, Email, dotenv, os, Flask cors, Flask migrate, Flask sqlalchemy, Flask session, Flask mail, Mysql connector python
+- __백엔드__ : __Flask__, Flask JWT extended, Flask WTF, WTForms, Werkzeug, SMTPlib, Email, dotenv, os, Flask cors, Flask migrate, Flask sqlalchemy, Flask session, Flask mail, Mysql connector python, pandas, numpy, sklearn, tensorflow
   - __API__ : naver image API<br>
 
 - __데이터베이스__ : MySQL
