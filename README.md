@@ -21,13 +21,16 @@ __프론트엔드 레포지토리__ : https://github.com/haaayeong/soomha-fronte
 - __퀴즈__ : 어린이를 대상으로 미세먼지 퀴즈를 제공합니다. 문제의 난이도는 레벨에 따라 달라질 수 있도록 구현하였습니다.
 
 ## 🛠 기술 스택
-- __프론트엔드__ : __React__, Axios, React Router Dom, React Query, React Leaflet, React Infinite Scroll Component, Font Awsome
-  - __API__ : kakao API, 단기예보조회 API, 놀이시설 API<br>
+### 1. 프론트엔드
+- __React__, Axios, React Router Dom, React Query, React Leaflet, React Infinite Scroll Component, Font Awsome
+- __API__ : kakao API, 단기예보 조회 API<br>
 
-- __백엔드__ : __Flask__, Flask JWT extended, Flask WTF, WTForms, Werkzeug, SMTPlib, Email, dotenv, os, Flask cors, Flask migrate, Flask sqlalchemy, Flask session, Flask mail, Mysql connector python, pandas, numpy, sklearn, tensorflow
-  - __API__ : naver image API<br>
+### 2. 백엔드
+- __Flask__, Flask JWT extended, Flask WTF, WTForms, Werkzeug, SMTPlib, Email, dotenv, os, Flask cors, Flask migrate, Flask sqlalchemy, Flask session, Flask mail, Mysql connector python, pandas, numpy, sklearn, tensorflow
+- __API__ : naver image API, tm 좌표 api, 미세먼지 API, 놀이시설 API<br>
 
-- __데이터베이스__ : MySQL
+### 3. 데이터베이스
+- __MySQL__
 
 ## 👩‍💻 팀구성
 이 프로젝트는 총 3명이 참여한 팀 프로젝트입니다.
