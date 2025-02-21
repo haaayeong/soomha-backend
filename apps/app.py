@@ -4,36 +4,72 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 from datetime import datetime, timedelta
+from flask_jwt_extended import JWTManager
+from flask_session import Session
+from flask_mail import Mail
 import random
 
 from apps.insertData import insert_data_to_db
 from apps.naver_image_api import get_naver_image_thumbnail
 from apps.dust import get_nearest_station
+from apps.config import config
 from apps.healthModel.useModel import predict_health_warning
 
 import os
-from dotenv import load_dotenv
+
+config_key = os.environ.get('FLASK_CONFIG_KEY', 'local')
 
 db = SQLAlchemy()
+mail = Mail()
+jwt = JWTManager()
 
 def create_app():
-    app = Flask(__name__)
-    CORS(app)  # React에서 Flask API 호출 허용
+    app = Flask(__name__, static_folder='static')
+    CORS(app, supports_credentials=True, resources={r'/*' : {'origins' : ['http://localhost:5173', 'http://127.0.0.1:5173']}})  # React에서 Flask API 호출 허용
+    app.config['WTF_CSRF_ENABLED'] = False
 
-    app.config.from_mapping(
-        # mysql 연결
-        SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
+    app.config.from_object(config['local'])
 
-        # SQLAlchemy가 변경 사항 추적하지 않도록 함.
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    app.config['JWT_SECRET_KEY'] = 'abcd'
 
-        # SQLAlchemy가 실행하는 SQL 쿼리를 콘솔에 출력하게 함.
-        SQLALCHEMY_ECHO=True
-    )
+    # 세션과 관련된 설정
+    # app.secret_key= app.config['SECRET_KEY']
+    app.secret_key = 'abcd'
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_PERMANENT'] = True
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+    app.config['SESSION_USE_SIGNER'] = True
+    app.config['SESSION_FILE_DIR'] = "./flask_session"
 
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True
+    Session(app)
+
+    mail.init_app(app)
     db.init_app(app)
+    jwt.init_app(app)
     Migrate(app, db)
 
+    from apps.crud import views as crud_views
+    app.register_blueprint(crud_views.bp, url_prefix='/crud')
+
+    from apps.crud import auth as crud_auth
+    app.register_blueprint(crud_auth.bp, url_prefix='/auth')
+
+    with app.app_context():
+        from apps.crud.models import Level
+        from sqlalchemy.exc import OperationalError
+        from sqlalchemy import inspect
+
+        try:
+            inspector = inspect(db.engine)
+            # 테이블이 존재하는지 확인
+            if inspector.has_table('level'):
+                from apps.initialize import initialize_levels
+                initialize_levels()
+        except OperationalError:
+            print("테이블이 아직 생성되지 않았음. initialize_levels() 실행을 건너뜀.")
+        
     from apps.models import PlayAreas
 
     @app.route('/api/test', methods=['GET'])
@@ -280,8 +316,6 @@ def create_app():
 
 
     return app
-
-
 
 if __name__ == '__main__':
     app = create_app()  # Flask 애플리케이션 객체 생성
