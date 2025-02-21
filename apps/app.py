@@ -56,7 +56,6 @@ def create_app():
     def placeCards():
         try:
             count = int(request.args.get('count', 10))  # 기본 10개 가져오기
-            max_id = db.session.query(db.func.max(PlayAreas.id)).scalar()
 
             # (1) 미세먼지 PM10 수치가 30 이하인 장소 최대 5개 조회
             low_pm_places = []
